@@ -1,0 +1,129 @@
+<mujoco model="ur5e">
+  <option iterations="50" timestep="0.001" solver="PGS" gravity="0 0 -9.81" />
+
+  <compiler angle="radian" meshdir="." eulerseq="zyx" autolimits="true" />
+
+  <default>
+    <joint limited="true" damping="0.01" armature="0.01" frictionloss="0.01" />
+    <geom condim="4" contype="1" conaffinity="15" friction="0.9 0.2 0.2" solref="0.001 2" />
+    <motor ctrllimited="true" />
+    <equality solref="0.001 2" />
+    <default class="visualgeom">
+      <geom material="visualgeom" condim="1" contype="0" conaffinity="0" />
+    </default>
+  </default>
+
+  <asset>
+    <mesh name="base" content_type="model/stl" file="meshes/ur5e/collision/base.stl" />
+    <mesh name="shoulder" content_type="model/stl" file="meshes/ur5e/collision/shoulder.stl" />
+    <mesh name="upperarm" content_type="model/stl" file="meshes/ur5e/collision/upperarm.stl" />
+    <mesh name="forearm" content_type="model/stl" file="meshes/ur5e/collision/forearm.stl" />
+    <mesh name="wrist1" content_type="model/stl" file="meshes/ur5e/collision/wrist1.stl" />
+    <mesh name="wrist2" content_type="model/stl" file="meshes/ur5e/collision/wrist2.stl" />
+    <mesh name="wrist3" content_type="model/stl" file="meshes/ur5e/collision/wrist3.stl" />
+    <texture name="texplane" type="2d" builtin="checker" rgb1=".0 .0 .0" rgb2=".8 .8 .8" width="100" height="100" />
+    <material name="matplane" reflectance="0." texture="texplane" texrepeat="1 1" texuniform="true" />
+    <material name="visualgeom" rgba="0.5 0.9 0.2 1" />
+  </asset>
+
+  <worldbody>
+    <light directional="true" diffuse="0.4 0.4 0.4" specular="0.1 0.1 0.1" pos="0 0 5.0" dir="0 0 -1" castshadow="false" />
+    <light directional="true" diffuse="0.6 0.6 0.6" specular="0.2 0.2 0.2" pos="0 0 4" dir="0 0 -1" />
+    <geom name="ground" type="plane" pos="0 0 0" size="100 100 0.001" quat="1 0 0 0" material="matplane" condim="3" conaffinity="15" />
+    
+    <!-- Bigger Industrial station/table -->
+    <geom name="station" type="box" pos="0 0 0.5" size="1.2 0.8 0.5" rgba="0.7 0.7 0.7 1" contype="1" conaffinity="1"/>
+    
+    <camera name="fixed" pos="0 -3.0 1.2" xyaxes="1 0 0 0 0 1" />
+    <camera name="track" mode="trackcom" pos="0 -3.0 1.2" xyaxes="1 0 0 0 0 1" />
+    
+    <!-- Mount robot on station - adjust z to match bigger station -->
+    <body name="root" pos="0 0 0.905" quat="1 0 0 0">
+      <!-- Remove freejoint line for fixed mounting -->
+      <!-- Add comprehensive sensor sites -->
+      <site name="base_imu" pos="0 0 0.05" size="0.01" rgba="0 0 1 1"/>
+      <site name="base_center" pos="0 0 0" size="0.01" rgba="1 0 0 1"/>
+      
+      <body name="shoulder_link" pos="0 0 0.1625" quat="0 0 0 1">
+        <inertial pos="0 -0.00193 -0.02561" quat="0.560239 0.250606 -0.316559 0.72327" mass="3.761" diaginertia="0.00703079 0.0070003 0.00602478" />
+        <site name="shoulder_imu" pos="0.05 0 0" size="0.01" rgba="0 1 0 1"/>
+        <joint name="shoulder_pan_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" />
+        <geom quat="0 0 0 1" type="mesh" mesh="shoulder" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
+        <geom type="mesh" rgba="" mesh="shoulder" quat="0 0 0 1" />
+        <body name="upper_arm_link" quat="0.707107 0.707107 0 0">
+          <inertial pos="-0.2125 0 0.11336" quat="0.500275 0.499641 0.500368 0.499716" mass="8.058" diaginertia="0.333881 0.332472 0.0150588" />
+          <joint name="shoulder_lift_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-150 150" />
+          <geom pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5" type="mesh" mesh="upperarm" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
+          <geom type="mesh" rgba="" mesh="upperarm" pos="0 0 0.138" quat="0.5 0.5 -0.5 -0.5" />
+          <body name="forearm_link" pos="-0.425 0 0">
+            <inertial pos="-0.2422 0 0.0265" quat="0.501301 0.498381 0.510711 0.489375" mass="2.846" diaginertia="0.0787927 0.0785102 0.00397103" />
+            <joint name="elbow_joint" pos="0 0 0" axis="0 0 1" range="-3.14159 3.14159" actuatorfrcrange="-150 150" />
+            <geom pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5" type="mesh" mesh="forearm" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
+            <geom type="mesh" rgba="" mesh="forearm" pos="0 0 0.007" quat="0.5 0.5 -0.5 -0.5" />
+            <body name="wrist_1_link" pos="-0.3922 0 0.1333">
+              <inertial pos="0 -0.01634 -0.0018" quat="0.960609 0.277707 0.00515042 -0.00913626" mass="1.37" diaginertia="0.00165502 0.00142363 0.00119868" />
+              <joint name="wrist_1_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" />
+              <geom pos="0 0 -0.127" quat="0.707107 0.707107 0 0" type="mesh" mesh="wrist1" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
+              <geom type="mesh" rgba="" mesh="wrist1" pos="0 0 -0.127" quat="0.707107 0.707107 0 0" />
+              <body name="wrist_2_link" pos="0 -0.0997 -2.04488e-11" quat="0.707107 0.707107 0 0">
+                <inertial pos="0 0.01634 -0.0018" quat="0.996652 -0.0779336 -0.00684629 -0.0237381" mass="1.3" diaginertia="0.00135637 0.00128607 0.00095814" />
+                <joint name="wrist_2_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" />
+                <geom pos="0 0 -0.0997" quat="1 0 0 0" type="mesh" mesh="wrist2" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
+                <geom type="mesh" rgba="" mesh="wrist2" pos="0 0 -0.0997" quat="1 0 0 0" />
+                <body name="wrist_3_link" pos="0 0.0996 -2.04283e-11" quat="0.707107 -0.707107 0 0">
+                  <inertial pos="0 0 -0.001159" quat="0.0048234 0.706235 -0.0143444 0.707816" mass="0.365" diaginertia="0.000257573 0.000189069 0.000186938" />
+                  <joint name="wrist_3_joint" pos="0 0 0" axis="0 0 1" range="-6.28319 6.28319" actuatorfrcrange="-28 28" />
+                  <geom pos="0 0 -0.0989" quat="0.707107 0.707107 0 0" type="mesh" mesh="wrist3" contype="1" conaffinity="0" density="0" group="1" class="visualgeom" />
+                  <geom type="mesh" rgba="" mesh="wrist3" pos="0 0 -0.0989" quat="0.707107 0.707107 0 0" />
+                  <site name="end_effector" pos="0 0 -0.1" size="0.02" rgba="1 1 0 1"/>
+                  <site name="wrist_imu" pos="0 0 -0.05" size="0.01" rgba="1 0 1 1"/>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <!-- Add weld constraint to lock base to world -->
+  <equality>
+    <weld name="base_to_world" body1="root" body2="world" anchor="0 0 1.0" solref="0.0001 1"/>
+  </equality>
+
+  <actuator>
+    <motor name="shoulder_pan_joint" joint="shoulder_pan_joint" ctrllimited="true" ctrlrange="-150 150" gear="1" />
+    <motor name="shoulder_lift_joint" joint="shoulder_lift_joint" ctrllimited="true" ctrlrange="-150 150" gear="1" />
+    <motor name="elbow_joint" joint="elbow_joint" ctrllimited="true" ctrlrange="-150 150" gear="1" />
+    <motor name="wrist_1_joint" joint="wrist_1_joint" ctrllimited="true" ctrlrange="-28 28" gear="1" />
+    <motor name="wrist_2_joint" joint="wrist_2_joint" ctrllimited="true" ctrlrange="-28 28" gear="1" />
+    <motor name="wrist_3_joint" joint="wrist_3_joint" ctrllimited="true" ctrlrange="-28 28" gear="1" />
+  </actuator>
+
+  <sensor>
+    <actuatorpos name="shoulder_pan_joint_p" actuator="shoulder_pan_joint" />
+    <actuatorvel name="shoulder_pan_joint_v" actuator="shoulder_pan_joint" />
+    <actuatorfrc name="shoulder_pan_joint_f" actuator="shoulder_pan_joint" noise="0.001" />
+    <actuatorpos name="shoulder_lift_joint_p" actuator="shoulder_lift_joint" />
+    <actuatorvel name="shoulder_lift_joint_v" actuator="shoulder_lift_joint" />
+    <actuatorfrc name="shoulder_lift_joint_f" actuator="shoulder_lift_joint" noise="0.001" />
+    <actuatorpos name="elbow_joint_p" actuator="elbow_joint" />
+    <actuatorvel name="elbow_joint_v" actuator="elbow_joint" />
+    <actuatorfrc name="elbow_joint_f" actuator="elbow_joint" noise="0.001" />
+    <actuatorpos name="wrist_1_joint_p" actuator="wrist_1_joint" />
+    <actuatorvel name="wrist_1_joint_v" actuator="wrist_1_joint" />
+    <actuatorfrc name="wrist_1_joint_f" actuator="wrist_1_joint" noise="0.001" />
+    <actuatorpos name="wrist_2_joint_p" actuator="wrist_2_joint" />
+    <actuatorvel name="wrist_2_joint_v" actuator="wrist_2_joint" />
+    <actuatorfrc name="wrist_2_joint_f" actuator="wrist_2_joint" noise="0.001" />
+    <actuatorpos name="wrist_3_joint_p" actuator="wrist_3_joint" />
+    <actuatorvel name="wrist_3_joint_v" actuator="wrist_3_joint" />
+    <actuatorfrc name="wrist_3_joint_f" actuator="wrist_3_joint" noise="0.001" />
+    <framequat name="base_orientation" objtype="site" noise="0.001" objname="base_imu" />
+    <gyro name="base_gyro" site="base_imu" noise="0.005" cutoff="34.9" />
+    <framequat name="shoulder_orientation" objtype="site" noise="0.001" objname="shoulder_imu" />
+    <framequat name="end_effector_orientation" objtype="site" noise="0.001" objname="wrist_imu" />
+    <force name="end_effector_force" site="end_effector" noise="0.1" />
+    <torque name="end_effector_torque" site="end_effector" noise="0.01" />
+  </sensor>
+</mujoco>
