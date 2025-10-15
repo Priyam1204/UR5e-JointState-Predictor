@@ -1,0 +1,4 @@
+Data Collection Report
+Total samples: 50000
+Safety violations: 0
+Joint limits enforced: UR5e Industrial Standard
